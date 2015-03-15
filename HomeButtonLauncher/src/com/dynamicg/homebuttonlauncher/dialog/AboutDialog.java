@@ -16,7 +16,7 @@ import com.dynamicg.homebuttonlauncher.tools.DialogHelper;
 
 public class AboutDialog extends Dialog {
 
-	private static final String REPOSITORY = "https://dynamicg-android-apps2.googlecode.com/trunk/HomeButtonLauncher";
+	private static final String REPOSITORY = "https://dynamicgandroidapps.svn.cloudforge.com/trunk/HomeButtonLauncher";
 
 	private final Context context;
 

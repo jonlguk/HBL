@@ -1,13 +1,10 @@
 package com.dynamicg.homebuttonlauncher.tools.drive;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.zip.GZIPInputStream;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -25,10 +22,9 @@ public class XmlReader {
 	private final XmlPullParser parser;
 	private int evtype;
 
-	public XmlReader(File file) throws Exception {
-		InputStream fis = new GZIPInputStream(new FileInputStream(file));
+	public XmlReader(InputStream inputStream) throws Exception {
 		parser = Xml.newPullParser();
-		parser.setInput(fis, XmlGlobals.ENCODING);
+		parser.setInput(inputStream, XmlGlobals.ENCODING);
 	}
 
 	private void nextItem() throws Exception {

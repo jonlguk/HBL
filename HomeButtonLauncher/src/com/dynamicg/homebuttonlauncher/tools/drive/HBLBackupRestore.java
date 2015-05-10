@@ -1,12 +1,15 @@
 package com.dynamicg.homebuttonlauncher.tools.drive;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.GZIPInputStream;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -138,10 +141,10 @@ public abstract class HBLBackupRestore {
 		return s==null || s.length()==0;
 	}
 
-	protected static void restoreSettings(Context context, File file, boolean deleteAfterRestore)
+	protected static void restoreSettings(Context context, InputStream inputStream)
 			throws Exception {
 		final HashMap<String, Editor> editors = new HashMap<String, Editor>();
-		XmlReader reader = new XmlReader(file);
+		XmlReader reader = new XmlReader(inputStream);
 		List<Map<String, String>> content = reader.getContent(context);
 		if (content==null||content.size()==0) {
 			return;
@@ -183,16 +186,16 @@ public abstract class HBLBackupRestore {
 		for (Editor edit:editors.values()) {
 			edit.apply();
 		}
-
-		if (deleteAfterRestore) {
-			file.delete();
-		}
 	}
 
 	public static void restoreImpl(MainActivityHome activity, Dialog dialog, File file, boolean deleteAfterRestore) {
 		try {
-			restoreSettings(activity, file, deleteAfterRestore);
+			InputStream inputStream = new GZIPInputStream(new FileInputStream(file));
+			restoreSettings(activity, inputStream);
 			GlobalContext.resetCache(); // make sure we don't retain icons scaled to previous size
+			if (deleteAfterRestore) {
+				file.delete();
+			}
 			dialog.dismiss();
 			activity.recreate();
 		}
@@ -201,4 +204,21 @@ public abstract class HBLBackupRestore {
 		}
 	}
 
+	/*
+	 * experimental - use this to initialise the app with a given template backup file
+	 * (A) copy your "settings.xml.gz" backup file to 'assets' folder
+	 * (B) trigger this from PreferencesManager.checkOnStartup()
+	 */
+	public static void initialSetup(MainActivityHome activity, String assetName) {
+		try {
+			InputStream asset = activity.getAssets().open(assetName);
+			InputStream inputStream = new GZIPInputStream(asset);
+			restoreSettings(activity, inputStream);
+			GlobalContext.resetCache();
+			activity.recreate();
+		}
+		catch (Throwable t) {
+			DialogHelper.showCrashReport(activity, t);
+		}
+	}
 }
